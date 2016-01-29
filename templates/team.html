@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Team {{team.license}}</title>
+</head>
+<body>
+  <h2>Team {{team.license}}</h2>
+  <h4>{{team.long_name}}</h4>
+  Skills attempts:
+  <ul>
+    {% for s in team.skill_results.all() %}
+      <li>{{s.typename}}: {{s.score}} at {{s.event.name}}</li>
+    {% else %}
+      <li>None</li>
+    {% endfor %}
+  </ul>
+
+
+</body>
+</html>

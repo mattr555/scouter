@@ -1,0 +1,4 @@
+.vagrant
+*.pyc
+data
+bower_components

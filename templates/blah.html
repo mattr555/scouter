@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>All teams</title>
+
+  <link rel="stylesheet" href="/bower/tablesorter/dist/css/theme.default.min.css" media="screen" title="no title" charset="utf-8">
+  <style media="screen">
+    tr:hover td {
+      background-color: #ccc !important;
+    }
+  </style>
+</head>
+<body>
+  <h2>All teams</h2>
+  <div>
+    <input type="text" class="search" data-column="0">
+    <table id="teams" class="tablesorter">
+      <thead>
+        <tr>
+          <th>License</th>
+          <th>Name</th>
+          <th>Robot</th>
+          <th>Programming</th>
+          <th>Events attended</th>
+        </tr>
+      </thead>
+      <tbody class="list">
+        {%for team in teams%}
+        <tr>
+          <td><a href="/team/{{team.license}}">{{team.license}}</a></td>
+          <td>{{team.long_name}}</td>
+          <td>{{team.best_skill(0).score or 0}}</td>
+          <td>{{team.best_skill(1).score or 0}}</td>
+          <td>{{team.events.count()}}</td>
+        </tr>
+      {%endfor%}
+      </tbody>
+    </table>
+  </div>
+
+  <script src="/bower/jquery/dist/jquery.min.js" charset="utf-8"></script>
+  <script src="/bower/tablesorter/dist/js/jquery.tablesorter.min.js" charset="utf-8"></script>
+  <script src="/bower/tablesorter/dist/js/jquery.tablesorter.widgets.min.js" charset="utf-8"></script>
+  <script type="text/javascript">
+    $(function(){
+      $('#teams').tablesorter({
+        widgets: ['filter'],
+        widgetOptions: {
+          filter_columnFilters: false,
+          filter_external: '.search'
+        }
+      });
+    })
+  </script>
+
+</body>
+</html>
