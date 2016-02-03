@@ -15,6 +15,7 @@
   <h2>All teams</h2>
   <div>
     <input type="text" class="search" data-column="0">
+    <input type="text" class="search" data-column="5">
     <table id="teams" class="tablesorter">
       <thead>
         <tr>
@@ -23,6 +24,7 @@
           <th>Robot</th>
           <th>Programming</th>
           <th>Events attended</th>
+          <th>Tags</th>
         </tr>
       </thead>
       <tbody class="list">
@@ -33,6 +35,7 @@
           <td>{{team.best_skill(0).score or 0}}</td>
           <td>{{team.best_skill(1).score or 0}}</td>
           <td>{{team.events.count()}}</td>
+          <td>{{team.tag_list}}</td>
         </tr>
       {%endfor%}
       </tbody>

@@ -1,0 +1,19 @@
+{% macro tag_item(tag, team) %}
+<li>
+  {{tag.name}}
+  <form class="tag_del" method="POST" action="/ajax/tag">
+    <input type="submit" value="-">
+    <input type="hidden" name="license" value="{{team.license}}">
+    <input type="hidden" name="do" value="del">
+    <input type="hidden" name="name" value="{{tag.name}}">
+  </form>
+</li>
+{% endmacro %}
+
+<ul>
+{%for t in tags %}
+  {{tag_item(t, team)}}
+{%else%}
+  <li>None</li>
+{%endfor%}
+</ul>

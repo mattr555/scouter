@@ -2,11 +2,18 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+tags = db.Table('tags',
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
+    db.Column('team_id', db.Integer, db.ForeignKey('team.id'))
+)
+
 class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     license = db.Column(db.String, unique=True)
     long_name = db.Column(db.String)
     skill_results = db.relationship('SkillResult', backref='team', lazy='dynamic')
+    tags = db.relationship('Tag', secondary=tags, backref=db.backref('teams', lazy='dynamic'))
+    notes = db.Column(db.Text)
 
     def __init__(self, license, long_name):
         self.license = license
@@ -26,7 +33,11 @@ class Team(db.Model):
 
     @property
     def matches(self):
-        return self.red_matches + self.blue_matches
+        return self.red_matches.union(self.blue_matches)
+
+    @property
+    def tag_list(self):
+        return ', '.join([i.name for i in self.tags])
 
 
 teamlist = db.Table('teamlist',
@@ -59,9 +70,9 @@ class Match(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     reds = db.relationship('Team', secondary=reds,
-        backref=db.backref('red_matches', lazy='joined'))
+        backref=db.backref('red_matches', lazy='dynamic'))
     blues = db.relationship('Team', secondary=blues,
-        backref=db.backref('blue_matches', lazy='joined'))
+        backref=db.backref('blue_matches', lazy='dynamic'))
     red_score = db.Column(db.Integer)
     blue_score = db.Column(db.Integer)
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
@@ -84,6 +95,11 @@ class Match(db.Model):
         elif license in [i.license for i in self.blues]:
             return self.blue_score
         return None
+
+    def on_team(self, team, license):
+        if team == "Red":
+            return license in [i.license for i in self.reds]
+        return license in [i.license for i in self.blues]
 
     def did_win(self, license):
         return self.score(license) == max(self.red_score, self.blue_score)
@@ -108,3 +124,13 @@ class SkillResult(db.Model):
     @property
     def typename(self):
         return ['Driver', 'Programming'][self.type]
+
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, unique=True)
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return '<Tag: {}>'.format(self.name)

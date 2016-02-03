@@ -46,6 +46,7 @@ def clean():
 def parse_event(names):
 	"""Parse event named NAME"""
 	if names == ('all',) or names is None:
+		clean()
 		names = os.listdir('data')
 	for name in names:
 		click.echo('parsing {}'.format(name))
@@ -70,9 +71,9 @@ def parse_event(names):
 		for row in reader:
 			m = Match()
 			m.name = name + '.' + row['round'] + '.' + row['instance'] + '.' + row['matchnum']
-			r = set(row[i] for i in ('red1', 'red2', 'red3')) - set([row['redsit']])
+			r = set(row[i] for i in ('red1', 'red2', 'red3')) - set([''])
 			m.reds = [get_team(i) for i in r]
-			b = set(row[i] for i in ('blue1', 'blue2', 'blue3')) - set([row['bluesit']])
+			b = set(row[i] for i in ('blue1', 'blue2', 'blue3')) - set([''])
 			m.blues = [get_team(i) for i in b]
 			m.red_score = int(row['redscore'])
 			m.blue_score = int(row['bluescore'])
