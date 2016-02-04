@@ -3,14 +3,16 @@ from flask.ext.bower import Bower
 from models import db, Team, Event, SkillResult, Match, Tag
 from operator import attrgetter
 import json
+import os
 
 class DefaultSettings(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite:////vagrant/data/data.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 app = Flask(__name__)
-app.config.from_object('default_settings')
-app.config.from_envvar('SCOUTER_SETTINGS')
+app.config.from_object(DefaultSettings)
+if os.environ.get('SCOUTER_SETTINGS'):
+    app.config.from_envvar('SCOUTER_SETTINGS')
 db.init_app(app)
 Bower(app)
 
@@ -18,8 +20,8 @@ Bower(app)
 @app.route('/event/<name>')
 def index(name=''):
     if name:
-        return render_template('blah.html', teams=Event.query.filter_by(name=name).first().teams, event_name=name)
-    return render_template('blah.html', teams=Team.query.all(), event_name="All")
+        return render_template('blah.html', teams=Event.query.filter_by(name=name).first().teams, event_name=name, events=Event.query.all())
+    return render_template('blah.html', teams=Team.query.all(), event_name="All", events=Event.query.all())
 
 @app.route('/team/<license>')
 def team(license):
@@ -44,14 +46,15 @@ def get_tag(n):
 
 @app.route('/ajax/tag', methods=["POST"])
 def update_tag():
-    tag = get_tag(request.form['name'])
     team = Team.query.filter_by(license=request.form['license']).first()
-    if request.form['do'] == 'add':
-        if tag not in team.tags:
-            team.tags.append(tag)
-    else:
-        if tag in team.tags:
-            team.tags.remove(tag)
+    for name in request.form['name'].split(','):
+        tag = get_tag(name.strip())
+        if request.form['do'] == 'add':
+            if tag not in team.tags:
+                team.tags.append(tag)
+        else:
+            if tag in team.tags:
+                team.tags.remove(tag)
     db.session.add(team)
     db.session.commit()
     return render_template('taglist.html', tags=team.tags, team=team)

@@ -28,4 +28,19 @@ $(function(){
   }
 
   reselectForms();
+
+  $('#pit_save').click(function(){
+    var $inputs = $('#pit_form :input');
+    var tags = '';
+    $inputs.each(function(){
+      var val = $(this).val();
+      if (val){
+        if ($(this).prop('type') == 'radio' && !$(this).prop('checked')) return;
+        tags += val + ',';
+      }
+    });
+
+    $.post('/ajax/tag', {'do': 'add', 'license': $('#license_input').val(), 'name': tags.slice(0, -1)}, updateTagList);
+    $('#pitModal').modal('hide');
+  });
 })

@@ -103,7 +103,7 @@ class Match(db.Model):
         return license in [i.license for i in self.blues]
 
     def did_win(self, license):
-        return self.score(license) == max(self.red_score, self.blue_score)
+        return self.score(license) != min(self.red_score, self.blue_score)
 
     def __repr__(self):
         return '<{}: {} {} - {} {}>'.format(

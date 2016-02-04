@@ -51,13 +51,14 @@
           </ul>
         </div>
         <form action="/ajax/tag" method="POST" id="tag_add" class="form-inline">
-          <input type="hidden" name="license" value="{{team.license}}">
+          <input type="hidden" name="license" id='license_input' value="{{team.license}}">
           <input type="hidden" name="do" value="add">
           <div class="form-group">
             <input type="text" name="name" id="tag_inp" class="form-control">
           </div>
           <input type="submit" value="+" class="btn btn-success">
         </form>
+        <button class="btn btn-primary" data-toggle="modal" data-target="#pitModal">Pit scouting</button>
       </div>
     </div>
 
@@ -77,20 +78,104 @@
         {% for m in team.matches %}
           <tr>
             <td>{{m.name}}</td>
-            <td {% if m.on_team("Red", team.license) %}class="hi"{%endif%}>{{m.reds[0].license}}, {{m.reds[1].license}}</td>
+            <td {% if m.on_team("Red", team.license) %}class="hi"{%endif%}>{{m.reds[0].license}}, {{m.reds[1].license}}{% if m.reds|length > 2 %}, {{m.reds[2].license}}{%endif%}</td>
             <td>{{m.red_score}}</td>
             <td>{{m.blue_score}}</td>
-            <td {% if m.on_team("Blue", team.license) %}class="hi"{%endif%}>{{m.blues[0].license}}, {{m.blues[1].license}}</td>
-            <td {% if m.did_win(team.license) %}class="good"{%endif%}>{{m.did_win(team.license)}}</td>
+            <td {% if m.on_team("Blue", team.license) %}class="hi"{%endif%}>{{m.blues[0].license}}, {{m.blues[1].license}}{% if m.blues|length > 2 %}, {{m.blues[2].license}}{%endif%}</td>
+            <td {% if m.did_win(team.license) %}class="success"{%endif%}>{{m.did_win(team.license)}}</td>
           </tr>
         {% else %}
           <tr><td>None</td></tr>
         {% endfor %}
       </table>
     </div>
+
+    <div class="modal fade" tabindex="-1" id="pitModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            <h4 class="modal-title">Pit scouting</h4>
+          </div>
+          <div class="modal-body">
+            <form id="pit_form">
+              <div class="form-group">
+                <label for="drivetype">Drive Type</label>
+                <select name="drivetype" id="drivetype" class="form-control">
+                  <option value="">-</option>
+                  <option value="drive-tank">Tank</option>
+                  <option value="drive-mecanum">Mecanum</option>
+                  <option value="drive-omni">Omni</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="shootertype">Shooter Type</label>
+                <select name="shootertype" id="shootertype" class="form-control">
+                  <option value="">-</option>
+                  <option value="shooter-puncher">Puncher</option>
+                  <option value="shooter-1flywheel">1 flywheel</option>
+                  <option value="shooter-2flywheel">2 flywheel</option>
+                  <option value="shooter-catapult">Catapult</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="handlinggoodbad">Handling?</label>
+                <div class="btn-group" data-toggle="buttons" id="handlinggoodbad">
+                  <label class="btn btn-danger">
+                    <input type="radio" name="handling" autocomplete="off" value="handling-bad"> bad
+                  </label>
+                  <label class="btn btn-primary active">
+                    <input type="radio" name="handling" autocomplete="off" value="" checked> meh
+                  </label>
+                  <label class="btn btn-success">
+                    <input type="radio" name="handling" autocomplete="off" value="handling-good"> good
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="autogoodbad">Auto?</label>
+                <div class="btn-group" data-toggle="buttons" id="autogoodbad">
+                  <label class="btn btn-danger">
+                    <input type="radio" name="auto" autocomplete="off" value="auto-bad"> bad
+                  </label>
+                  <label class="btn btn-primary active">
+                    <input type="radio" name="auto" autocomplete="off" value="" checked> meh
+                  </label>
+                  <label class="btn btn-success">
+                    <input type="radio" name="auto" autocomplete="off" value="auto-good"> good
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="fieldinggoodbad">Fielding?</label>
+                <div class="btn-group" data-toggle="buttons" id="fieldinggoodbad">
+                  <label class="btn btn-danger">
+                    <input type="radio" name="fielding" autocomplete="off" value="fielding-bad"> bad
+                  </label>
+                  <label class="btn btn-primary active">
+                    <input type="radio" name="fielding" autocomplete="off" value="" checked> meh
+                  </label>
+                  <label class="btn btn-success">
+                    <input type="radio" name="fielding" autocomplete="off" value="fielding-good"> good
+                  </label>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button id="pit_save" type="button" class="btn btn-success">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   <script src="/bower/jquery/dist/jquery.min.js" charset="utf-8"></script>
   <script src="/bower/jquery-form/jquery.form.js" charset="utf-8"></script>
+  <script src="/bower/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script>
   <script src="/static/team.js" charset="utf-8"></script>
 </body>
 </html>

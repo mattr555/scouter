@@ -15,6 +15,13 @@
     <div class="form-inline">
       <input type="text" class="search form-control" data-column="0" placeholder="license">
       <input type="text" class="search form-control" data-column="5" placeholder="tag">
+      <select id="event_select">
+        <option value="">-</option>
+        <option value="/">All</option>
+        {% for e in events %}
+          <option value="/event/{{e.name}}">{{e.name}}</option>
+        {% endfor %}
+      </select>
     </div>
     <table id="teams" class="tablesorter table-condensed table-hover">
       <thead>
@@ -54,8 +61,13 @@
         widgetOptions: {
           filter_columnFilters: false,
           filter_external: '.search'
-        }
+        },
+        sortList: [[0,0]]
       });
+
+      $('#event_select').change(function(){
+        window.location = $(this).val();
+      })
     })
   </script>
 
