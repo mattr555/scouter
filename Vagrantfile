@@ -66,11 +66,6 @@ Vagrant.configure(2) do |config|
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
     cd /vagrant
-    sudo apt-get install -y curl git
-    curl -sL https://deb.nodesource.com/setup | sudo bash -
-    sudo apt-get install -y python-pip nodejs
-    sudo pip install -r requirements.txt
-    sudo npm install -g bower
-    bower install
+    ./bootstrap.sh
   SHELL
 end
