@@ -48,6 +48,7 @@ teamlist = db.Table('teamlist',
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)
+    sku = db.Column(db.String, unique=True)
     teams = db.relationship('Team', secondary=teamlist,
         backref=db.backref('events', lazy='dynamic'))
     matches = db.relationship('Match', backref='event')

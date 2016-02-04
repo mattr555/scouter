@@ -5,6 +5,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Team {{team.license}}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/bower/bootstrap/dist/css/bootstrap.min.css">
   <style>
     .good {background-color: green}
     .hi {background-color: #ccc}
@@ -12,66 +14,81 @@
   </style>
 </head>
 <body>
-  <h2>Team {{team.license}}</h2>
-  <h4>{{team.long_name}}</h4>
-  Skills attempts:
-  <ul>
-    {% for s in team.skill_results.all() %}
-      <li>{{s.typename}}: {{s.score}} at {{s.event.name}}</li>
-    {% else %}
-      <li>None</li>
-    {% endfor %}
-  </ul>
+  <div class="container">
+    <div class="row">
+      <h2>Team {{team.license}}</h2>
+      <h4>{{team.long_name}}</h4>
+      Skills attempts:
+      <ul>
+        {% for s in team.skill_results.all() %}
+          <li>{{s.typename}}: {{s.score}} at {{s.event.name}}</li>
+        {% else %}
+          <li>None</li>
+        {% endfor %}
+      </ul>
+    </div>
 
-  Notes:<br>
-  <form id="notes_form" method="POST" action="/ajax/notes">
-    <textarea id="notes_area" name="notes" rows="8" cols="40">{{team.notes}}</textarea><br>
-    <input type="hidden" name="license" value="{{team.license}}">
-    <input type="submit" id="notes_sub" disabled><span id="notes_status"></span>
-  </form>
 
-  Tags:
-  <div id="tags">
-    <ul>
-      {% for t in team.tags %}
-        {{tag_item(t, team)}}
-      {% else %}
-        <li>None</li>
-      {% endfor %}
-    </ul>
+    <div class="row">
+      <div class="col-md-6">
+        <h4>Notes:</h4><br>
+        <form id="notes_form" method="POST" action="/ajax/notes">
+          <textarea id="notes_area" name="notes" rows="8" cols="40" class="form-control">{{team.notes}}</textarea><br>
+          <input type="hidden" name="license" value="{{team.license}}">
+          <input type="submit" id="notes_sub" class="btn btn-success" disabled><span id="notes_status" class="glyphicon glyphicon-ok-sign"></span>
+        </form>
+      </div>
+
+      <div class="col-md-6">
+        <h4>Tags:</h4>
+        <div id="tags">
+          <ul>
+            {% for t in team.tags %}
+              {{tag_item(t, team)}}
+            {% else %}
+              <li>None</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <form action="/ajax/tag" method="POST" id="tag_add" class="form-inline">
+          <input type="hidden" name="license" value="{{team.license}}">
+          <input type="hidden" name="do" value="add">
+          <div class="form-group">
+            <input type="text" name="name" id="tag_inp" class="form-control">
+          </div>
+          <input type="submit" value="+" class="btn btn-success">
+        </form>
+      </div>
+    </div>
+
+    <div class="row">
+      <h4>Matches:</h4>
+      <table class="table table-condensed">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Red</th>
+            <th></th>
+            <th></th>
+            <th>Blue</th>
+            <th>Win?</th>
+          </tr>
+        </thead>
+        {% for m in team.matches %}
+          <tr>
+            <td>{{m.name}}</td>
+            <td {% if m.on_team("Red", team.license) %}class="hi"{%endif%}>{{m.reds[0].license}}, {{m.reds[1].license}}</td>
+            <td>{{m.red_score}}</td>
+            <td>{{m.blue_score}}</td>
+            <td {% if m.on_team("Blue", team.license) %}class="hi"{%endif%}>{{m.blues[0].license}}, {{m.blues[1].license}}</td>
+            <td {% if m.did_win(team.license) %}class="good"{%endif%}>{{m.did_win(team.license)}}</td>
+          </tr>
+        {% else %}
+          <tr><td>None</td></tr>
+        {% endfor %}
+      </table>
+    </div>
   </div>
-  <form action="/ajax/tag" method="POST" id="tag_add">
-    <input type="hidden" name="license" value="{{team.license}}">
-    <input type="text" name="name" id="tag_inp">
-    <input type="hidden" name="do" value="add">
-    <input type="submit" value="+">
-  </form>
-
-  Matches:
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Red</th>
-        <th></th>
-        <th></th>
-        <th>Blue</th>
-        <th>Win?</th>
-      </tr>
-    </thead>
-    {% for m in team.matches %}
-      <tr>
-        <td>{{m.name}}</td>
-        <td {% if m.on_team("Red", team.license) %}class="hi"{%endif%}>{{m.reds[0].license}}, {{m.reds[1].license}}</td>
-        <td>{{m.red_score}}</td>
-        <td>{{m.blue_score}}</td>
-        <td {% if m.on_team("Blue", team.license) %}class="hi"{%endif%}>{{m.blues[0].license}}, {{m.blues[1].license}}</td>
-        <td {% if m.did_win(team.license) %}class="good"{%endif%}>{{m.did_win(team.license)}}</td>
-      </tr>
-    {% else %}
-      <tr><td>None</td></tr>
-    {% endfor %}
-  </table>
   <script src="/bower/jquery/dist/jquery.min.js" charset="utf-8"></script>
   <script src="/bower/jquery-form/jquery.form.js" charset="utf-8"></script>
   <script src="/static/team.js" charset="utf-8"></script>

@@ -1,5 +1,5 @@
 from app import app, db, Team, Event, SkillResult, Match
-import click, csv, os, requests
+import click, csv, os, requests, bs4
 
 db.app = app
 
@@ -43,11 +43,12 @@ def clean():
 
 @cli.command('parse')
 @click.argument('names', nargs=-1)
-def parse_event(names):
+@click.pass_context
+def parse_event(ctx, names):
 	"""Parse event named NAME"""
-	if names == ('all',) or names is None:
-		clean()
-		names = os.listdir('data')
+	if names == ('all',) or not names:
+		ctx.invoke(clean)
+		names = set(os.listdir('data')) - set(['data.db'])
 	for name in names:
 		click.echo('parsing {}'.format(name))
 		path = os.path.join(os.path.dirname(__file__), 'data', name)
@@ -56,7 +57,8 @@ def parse_event(names):
 		teams = []
 		for row in rankings:
 			teams.append(get_team(row['teamnum'], row['teamname']))
-		event = Event(name=name, teams=teams)
+			sku = row['sku']
+		event = Event(name=name, teams=teams, sku=sku)
 		db.session.add(event)
 
 		for i, skill_type in enumerate(['robot', 'programming']):
@@ -83,6 +85,25 @@ def parse_event(names):
 		db.session.commit()
 		click.echo('done')
 
+team_list_address = 'http://www.robotevents.com/{}.html'
+
+@cli.command('new')
+@click.argument('sku')
+@click.argument('name')
+def new_event(name, sku):
+	"""create a new upcoming event from a team list"""
+	click.echo('parsing {} team list into {}'.format(sku, name))
+	r = requests.get(team_list_address.format(sku)).text
+	t = bs4.BeautifulSoup(r, 'html.parser')
+	rows = t.find(id='reTeamTable').contents[3:]
+	teams = []
+	for row in rows:
+		if type(row) is bs4.element.Tag:
+			teams.append(get_team(row.contents[1].contents[0]))
+	e = Event(name=name, teams=teams, sku=sku)
+	db.session.add(e)
+	db.session.commit()
+	click.echo('done')
 
 if __name__ == "__main__":
 	cli()

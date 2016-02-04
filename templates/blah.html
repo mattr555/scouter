@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>All teams</title>
+  <title>{{event_name}} team list</title>
 
-  <link rel="stylesheet" href="/bower/tablesorter/dist/css/theme.default.min.css" media="screen" title="no title" charset="utf-8">
-  <style media="screen">
-    tr:hover td {
-      background-color: #ccc !important;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="/bower/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/bower/tablesorter/dist/css/theme.bootstrap.min.css" media="screen" title="no title" charset="utf-8">
 </head>
 <body>
-  <h2>All teams</h2>
-  <div>
-    <input type="text" class="search" data-column="0">
-    <input type="text" class="search" data-column="5">
-    <table id="teams" class="tablesorter">
+  <div class="container">
+    <h2>{{event_name}} team list</h2>
+    <div class="form-inline">
+      <input type="text" class="search form-control" data-column="0" placeholder="license">
+      <input type="text" class="search form-control" data-column="5" placeholder="tag">
+    </div>
+    <table id="teams" class="tablesorter table-condensed table-hover">
       <thead>
         <tr>
           <th>License</th>
@@ -48,7 +48,9 @@
   <script type="text/javascript">
     $(function(){
       $('#teams').tablesorter({
-        widgets: ['filter'],
+        theme: 'bootstrap',
+        headerTemplate: '{content} {icon}',
+        widgets: ['uitheme', 'filter'],
         widgetOptions: {
           filter_columnFilters: false,
           filter_external: '.search'

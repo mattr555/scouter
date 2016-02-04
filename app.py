@@ -11,8 +11,11 @@ db.init_app(app)
 Bower(app)
 
 @app.route('/')
-def index():
-    return render_template('blah.html', teams=sorted(sorted(Team.query.all(), key=attrgetter('license')), key=attrgetter('school')))
+@app.route('/event/<name>')
+def index(name=''):
+    if name:
+        return render_template('blah.html', teams=Event.query.filter_by(name=name).first().teams, event_name=name)
+    return render_template('blah.html', teams=Team.query.all(), event_name="All")
 
 @app.route('/team/<license>')
 def team(license):
