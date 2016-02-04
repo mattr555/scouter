@@ -4,9 +4,13 @@ from models import db, Team, Event, SkillResult, Match, Tag
 from operator import attrgetter
 import json
 
+class DefaultSettings(object):
+    SQLALCHEMY_DATABASE_URI = 'sqlite:////vagrant/data/data.db'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////vagrant/data/data.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config.from_object('default_settings')
+app.config.from_envvar('SCOUTER_SETTINGS')
 db.init_app(app)
 Bower(app)
 

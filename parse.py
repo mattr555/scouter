@@ -105,5 +105,11 @@ def new_event(name, sku):
 	db.session.commit()
 	click.echo('done')
 
+@cli.command('list')
+def list_events():
+	"""list events and their skus"""
+	for i in Event.query.all():
+		click.echo(i.name + " " + i.sku)
+
 if __name__ == "__main__":
 	cli()
