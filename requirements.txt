@@ -1,6 +1,0 @@
-Flask
-Flask-SQLAlchemy
-Flask-Bower
-click
-requests
-beautifulsoup4
