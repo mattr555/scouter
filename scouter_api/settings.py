@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
-import SECRET_KEY from secret_settings
+from .secret_settings import SECRET_KEY
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -121,8 +121,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/build/'
 
+SCOUTER_WEB_LOCATION = os.path.join(os.path.dirname(BASE_DIR), 'scouter-web/build')
+
+SCOUTER_INDEX_LOCATION = os.path.join(SCOUTER_WEB_LOCATION, 'index.html')
+
+STATICFILES_DIRS = [
+    os.path.dirname(SCOUTER_INDEX_LOCATION)
+]
 
 # Oauth2
 

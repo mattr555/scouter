@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from .models import Note, Team
 
 
@@ -11,9 +12,15 @@ class NoteSerializer(serializers.ModelSerializer):
         fields = ('id', 'body', 'created', 'owner', 'team')
 
 
+class UpperCaseField(serializers.CharField):
+    def to_internal_value(self, data):
+        ret = super(UpperCaseField, self).to_internal_value(data)
+        return ret.upper()
+
 class TeamSerializer(serializers.ModelSerializer):
     # notes = NoteSerializer(many=True, read_only=True)
     notes = serializers.SerializerMethodField()
+    license = UpperCaseField(validators=[UniqueValidator(queryset=Team.objects.all(), message="This team already exists.")])
 
     class Meta:
         model = Team

@@ -15,7 +15,10 @@ Including another URLconf
 """
 
 from django.conf.urls import url, include
+from .views import index, build_file
 
 urlpatterns = [
-    url(r'^api/', include('restapi.urls'))
+    url(r'^api/', include('restapi.urls')),
+    url(r'^build/(?P<filename>[\w\.]+)$', build_file),
+    url(r'.*', index)
 ]

@@ -8,6 +8,10 @@ class Team(models.Model):
     def __str__(self):
         return self.license
 
+    def save(self, *args, **kwargs):
+        self.license = self.license.upper()
+        super(Team, self).save(*args, **kwargs)
+
 
 class Note(models.Model):
     created = models.DateTimeField(auto_now_add=True)
