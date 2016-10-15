@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
+from .validators import robot_field_validator
 import json
 
 
@@ -43,22 +43,6 @@ class Note(models.Model):
     owner = models.ForeignKey('auth.User', related_name='notes', on_delete=models.CASCADE)
     team = models.ForeignKey(Team, related_name='notes', on_delete=models.CASCADE)
     body = models.TextField()
-
-
-ROBOT_FIELD_TYPES = ['option', 'badgood', 'number']
-
-def robot_field_validator(value):
-    if not isinstance(value, list):
-        raise ValidationError("Array of values required")
-    for i in value:
-        if not i.get("name"):
-            raise ValidationError("{} requires a name field".format(i))
-        if not i.get("type"):
-            raise ValidationError("{} requires a type field".format(i))
-        if i.get("type") not in ROBOT_FIELD_TYPES:
-            raise ValidationError("{} type must be one of {}".format(i, ''.join(ROBOT_FIELD_TYPES)))
-        if i.get("type") == "option" and not isinstance(i.get("options"), list):
-            raise ValidationError("{} requires an array of options".format(i))
 
 class UserProfile(models.Model):
     def default_robot_fields():

@@ -2,18 +2,21 @@ from django.contrib.auth.models import User
 from rest_framework import viewsets, permissions, mixins
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from .models import Team, Note
 from .serializers import UserSerializer, NoteSerializer, TeamSerializer
+from .permissions import IsSelfOrAdminOrReadOnly
 
 
 @api_view(['GET'])
 def me(request):
     return Response(UserSerializer(request.user, context={'request': request}).data)
 
-class UserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     """Get info on all users in the system; or yourself at /me"""
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated, IsSelfOrAdminOrReadOnly)
 
     def get_object(self):
         if self.kwargs.get('pk') == "me":
@@ -37,8 +40,3 @@ class NoteViewSet(viewsets.ModelViewSet):
 class TeamViewSet(viewsets.ModelViewSet):
     serializer_class = TeamSerializer
     queryset = Team.objects.all()
-
-    # @detail_route(permission_classes=[permissions.IsAuthenticated])
-    # def get_notes(self, request, pk=None):
-    #     notes = self.get_object().notes.filter(owner=self.request.user).all()
-    #     return Response(NoteSerializer(notes, many=True).data)
