@@ -3,6 +3,7 @@ from rest_framework import viewsets, permissions, mixins
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_extensions.mixins import NestedViewSetMixin
 from .models import Team, Note
 from .serializers import UserSerializer, NoteSerializer, TeamSerializer
 from .permissions import IsSelfOrAdminOrReadOnly
@@ -27,16 +28,19 @@ class UserViewSet(viewsets.ModelViewSet):
     #     return self.retrieve(request, *args, **kwargs)
 
 
-class NoteViewSet(viewsets.ModelViewSet):
+class NoteViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     serializer_class = NoteSerializer
+    queryset = Note.objects.all()
 
     def get_queryset(self):
-        return self.request.user.notes.all()
+        return super(NoteViewSet, self).get_queryset().filter(owner=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        # get team id from url params, so the user only specifies body
+        query = self.get_parents_query_dict()
+        serializer.save(owner=self.request.user, team_id=query.get('team_id'))
 
 
-class TeamViewSet(viewsets.ModelViewSet):
+class TeamViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     serializer_class = TeamSerializer
     queryset = Team.objects.all()
