@@ -44,6 +44,14 @@ class Note(models.Model):
     team = models.ForeignKey(Team, related_name='notes', on_delete=models.CASCADE)
     body = models.TextField()
 
+class RobotProperties(models.Model):
+    owner = models.ForeignKey('auth.User', related_name='robot_props', on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, related_name='robot_props', on_delete=models.CASCADE)
+    props = JSONField(blank=True)
+
+    class Meta:
+        unique_together = ('owner', 'team')
+
 class UserProfile(models.Model):
     def default_robot_fields():
         return [

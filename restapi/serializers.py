@@ -1,15 +1,24 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from .models import Note, Team, UserProfile
+from .models import Note, Team, UserProfile, RobotProperties
 from .validators import robot_field_validator
 
 
 class NoteSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
+    team = serializers.ReadOnlyField(source='team.license')
     class Meta:
         model = Note
         fields = ('id', 'body', 'created', 'owner', 'team')
+
+
+class RobotPropertiesSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+    props = serializers.ListField()
+    class Meta:
+        model = RobotProperties
+        fields = ('id', 'props', 'owner', 'team')
 
 
 class UpperCaseField(serializers.CharField):
@@ -20,18 +29,24 @@ class UpperCaseField(serializers.CharField):
 class TeamSerializer(serializers.ModelSerializer):
     # notes = NoteSerializer(many=True, read_only=True)
     notes = serializers.SerializerMethodField()
+    robot_props = serializers.SerializerMethodField()
     license = UpperCaseField(validators=[UniqueValidator(queryset=Team.objects.all(), message="This team already exists.")])
 
     class Meta:
         model = Team
-        fields = ('license', 'name', 'notes')
+        fields = ('license', 'name', 'notes', 'robot_props')
 
     def get_notes(self, obj):
         user = self.context['request'].user
         qs = Note.objects.filter(owner=user, team=obj)
         return NoteSerializer(qs, many=True).data
 
-PROFILE_FIELDS = ('robot_fields',)
+    def get_robot_props(self, obj):
+        user = self.context['request'].user
+        props = RobotProperties.objects.filter(owner=user, team=obj).first()
+        if props:
+            return RobotPropertiesSerializer(props).data
+        return None
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     robot_fields = serializers.ListField(source='profile.robot_fields')
