@@ -15,6 +15,7 @@ class NoteSerializer(serializers.ModelSerializer):
 
 class RobotPropertiesSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
+    team = serializers.ReadOnlyField(source='team.license')
     props = serializers.ListField()
     class Meta:
         model = RobotProperties
@@ -45,7 +46,8 @@ class TeamSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         props = RobotProperties.objects.filter(owner=user, team=obj).first()
         if props:
-            return RobotPropertiesSerializer(props).data
+            # return RobotPropertiesSerializer(props).data
+            return props.props
         return None
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):

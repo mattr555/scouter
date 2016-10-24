@@ -1,11 +1,12 @@
 from django.contrib.auth.models import User
-from rest_framework import viewsets, permissions, mixins
-from rest_framework.decorators import api_view
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import viewsets, permissions, mixins, status
+from rest_framework.decorators import api_view, detail_route
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_extensions.mixins import NestedViewSetMixin
-from .models import Team, Note
-from .serializers import UserSerializer, NoteSerializer, TeamSerializer
+from .models import Team, Note, RobotProperties
+from .serializers import UserSerializer, NoteSerializer, TeamSerializer, RobotPropertiesSerializer
 from .permissions import IsSelfOrAdminOrReadOnly
 
 
@@ -44,3 +45,28 @@ class NoteViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
 class TeamViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     serializer_class = TeamSerializer
     queryset = Team.objects.all()
+
+
+    # TODO: investigate ways to do this automatically
+    # nested viewset? doesn't seem to work for a single item
+    @detail_route(methods=["get", "post"])
+    def props(self, request, *args, **kwargs):
+        team = self.get_object()
+        if request.method == "GET":
+            try:
+                props = RobotProperties.objects.get(team=team, owner=request.user)
+                return Response(RobotPropertiesSerializer(props).data)
+            except ObjectDoesNotExist:
+                return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        elif request.method == "POST":
+            try:
+                props = RobotProperties.objects.get(team=team, owner=request.user)
+                serializer = RobotPropertiesSerializer(props, data=request.data)
+                _status = status.HTTP_200_OK
+            except ObjectDoesNotExist:
+                serializer = RobotPropertiesSerializer(data=request.data)
+                _status = status.HTTP_201_CREATED
+
+            if serializer.is_valid(raise_exception=True):
+                serializer.save(team=team, owner=request.user)
+                return Response(serializer.data, status=_status)
